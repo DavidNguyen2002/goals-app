@@ -1,20 +1,80 @@
-import { StatusBar } from 'expo-status-bar';
-import { StyleSheet, Text, View } from 'react-native';
+import { StyleSheet, View, FlatList, Button } from "react-native";
+import { useState } from "react";
+import GoalItem from "./components/GoalItem";
+import GoalInput from "./components/GoalInput";
+import { StatusBar } from "expo-status-bar";
 
-export default function App() {
+function App() {
+  const [goals, setGoals] = useState([]);
+  const [modalIsVisible, setModalIsVisible] = useState(false);
+
+  function addGoalHandler(newGoal) {
+    setGoals((prev) => {
+      return [...prev, { text: newGoal, id: Math.random().toString() }];
+    });
+    addGoalEndHandler();
+  }
+
+  function deleteGoalHandler(id) {
+    setGoals((prev) => {
+      return prev.filter((goal) => goal.id !== id);
+    });
+  }
+
+  function addGoalStartHandler() {
+    setModalIsVisible(true);
+  }
+
+  function addGoalEndHandler() {
+    setModalIsVisible(false);
+  }
+
   return (
-    <View style={styles.container}>
-      <Text>Open up App.js to start working on your app!</Text>
-      <StatusBar style="auto" />
-    </View>
+    <>
+      <StatusBar style="light" />
+      <View style={styles.appContainer}>
+        <Button
+          title="Add New Goal"
+          color="#a065ec"
+          onPress={addGoalStartHandler}
+        />
+        {modalIsVisible && (
+          <GoalInput
+            addGoal={addGoalHandler}
+            visible={modalIsVisible}
+            closeHandler={addGoalEndHandler}
+          />
+        )}
+        <View style={styles.goalsContainer}>
+          <FlatList
+            data={goals}
+            renderItem={(itemData) => (
+              <GoalItem
+                text={itemData.item.text}
+                onDelete={deleteGoalHandler}
+                id={itemData.item.id}
+              />
+            )}
+            keyExtractor={(item, index) => {
+              return item.id;
+            }}
+          />
+        </View>
+      </View>
+    </>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
+  appContainer: {
     flex: 1,
-    backgroundColor: '#fff',
-    alignItems: 'center',
-    justifyContent: 'center',
+    paddingTop: 50,
+    paddingHorizontal: 16,
+  },
+
+  goalsContainer: {
+    flex: 4,
   },
 });
+
+export default App;
